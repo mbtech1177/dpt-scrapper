@@ -91,13 +91,13 @@ class ScrapeCommand extends Command
                         ];
                         // Persist result into database
                         $this->savePemilih($contents, $meta);
-                        break;
+                        // break;
                     }
-                    break;
+                    // break;
                 }
-                break;
+                // break;
             }
-            break;
+            // break;
         }
         return;
     }
