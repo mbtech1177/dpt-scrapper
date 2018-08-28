@@ -60,6 +60,12 @@ class ScrapeCommand extends Command
         $contents = $response->getBody()->getContents();
         $arrayContents = json_decode($contents, true);
 
+        $totalPemilih = 0;
+        foreach ($arrayContents['aaData'] as $kota) {
+            $totalPemilih += $kota['totalPemilih'];
+        }
+        print "Total Pemilih: " . $totalPemilih . PHP_EOL;
+
         if (!isset($arrayContents['aaData'][0]['nik'])) {
             print "Not Found!\n";
             return;
