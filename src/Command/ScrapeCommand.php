@@ -87,22 +87,12 @@ class ScrapeCommand extends Command
                         $this->savePemilih($contents, $meta);
                         break;
                     }
-                    // var_dump($arrayTps);
                     break;
                 }
                 break;
             }
             break;
-            // var_dump($arrayKecamatan);
         }
-        // print "Total Pemilih: " . $totalPemilih . PHP_EOL;
-
-        // if (!isset($arrayContents['aaData'][0]['nik'])) {
-        //     print "Not Found!\n";
-        //     return;
-        // }
-
-        // $this->savePemilih($response->getBody()->getContents());
         return;
     }
 
