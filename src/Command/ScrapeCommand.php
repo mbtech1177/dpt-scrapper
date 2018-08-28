@@ -67,16 +67,18 @@ class ScrapeCommand extends Command
             $arrayKecamatan = json_decode($this->scrap($pathKota), true);
 
             foreach ($arrayKecamatan['aaData'] as $kecamatan) {
+                // Scrap data by kecamatan
                 $pathKecamatan = $pathKota . $kecamatan['namaKecamatan'] . '/';
                 $arrayKelurahan = json_decode($this->scrap($pathKecamatan), true);
 
                 foreach ($arrayKelurahan['aaData'] as $kelurahan) {
+                    // Scrap data by kelurahan
                     $pathKelurahan = $pathKecamatan . $kelurahan['namaKelurahan'] . '/';
                     $arrayTps = json_decode($this->scrap($pathKelurahan), true);
 
                     foreach ($arrayTps['aaData'] as $tps) {
+                        // Scrap data by tps
                         $pathTps = $pathKelurahan . $tps['tps'] . '/';
-                        // $arrayPemilih = json_decode($this->scrap($pathTps), true);
                         $contents = $this->scrap($pathTps);
                         $meta = [
                             'provinsi' => $tps['namaPropinsi'],
@@ -84,6 +86,7 @@ class ScrapeCommand extends Command
                             'kecamatan' => $tps['namaKecamatan'],
                             'kelurahan' => $tps['namaKelurahan'],
                         ];
+                        // Persist result into database
                         $this->savePemilih($contents, $meta);
                         break;
                     }
