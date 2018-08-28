@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Ramsey\Uuid\Uuid;
 
 /**
  * @ORM\Entity(repositoryClass="App\Repository\PemilihRepository")
@@ -11,8 +12,7 @@ class Pemilih
 {
     /**
      * @ORM\Id()
-     * @ORM\GeneratedValue()
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="uuid")
      */
     private $id;
 
@@ -56,7 +56,12 @@ class Pemilih
      */
     private $nik;
 
-    public function getId(): ?int
+    public function __construct()
+    {
+        $this->id = Uuid::Uuid4();
+    }
+
+    public function getId()
     {
         return $this->id;
     }
