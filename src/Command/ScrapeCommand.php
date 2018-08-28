@@ -28,4 +28,10 @@ class ScrapeCommand extends Command
         $io->title('Memulai scrapping data ...');
         $io->success('Proses scrapping telah selesai.');
     }
+
+    private function generatePath(string $path)
+    {
+        $this->timestamp = '?_=' . (new \Datetime)->getTimestamp();
+        return $path . $this->suffix . $this->timestamp;
+    }
 }
