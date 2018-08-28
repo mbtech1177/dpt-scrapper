@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Entity\Pemilih;
+use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Client;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -14,7 +15,15 @@ class ScrapeCommand extends Command
     private $baseURI = 'https://infopemilu.kpu.go.id/pilkada2018/pemilih/dpt/1/BANTEN/';
     private $suffix = 'listDps.json';
     private $timestamp;
+    private $em;
     protected static $defaultName = 'app:scrape';
+
+    public function __construct(EntityManagerInterface $em)
+    {
+        parent::__construct();
+
+        $this->em = $em;
+    }
 
     protected function configure()
     {
@@ -49,21 +58,30 @@ class ScrapeCommand extends Command
     private function savePemilih(string $json)
     {
         $arrayPemilih = json_decode($json, true);
+        $index = 0;
         foreach ($arrayPemilih['aaData'] as $calonPemilih) {
             if (!isset($calonPemilih['nik'])) {
                 print "Nothing to do.\n";
                 break;
             }
+            $index++;
             $pemilih = new Pemilih;
             $pemilih->setNama($calonPemilih['nama'])
                 ->setNik($calonPemilih['nik'])
                 ->setJenisKelamin($calonPemilih['jenisKelamin'])
-                // ->setAlamat()
-                // ->setKelurahan()
-                // ->setKecamatan()
-                // ->setKota()
-                // ->setProvinsi()
+                ->setAlamat('')
+                ->setKelurahan('')
+                ->setKecamatan('')
+                ->setKota('')
+                ->setProvinsi('')
             ;
+            $this->em->persist($pemilih);
+            if (($index % 20) === 0) {
+                $this->em->flush();
+                $this->em->clear();
+            }
         }
+        $this->em->flush();
+        $this->em->clear();
     }
 }
