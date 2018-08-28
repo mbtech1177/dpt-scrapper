@@ -78,8 +78,14 @@ class ScrapeCommand extends Command
                         $pathTps = $pathKelurahan . $tps['tps'] . '/';
                         // $arrayPemilih = json_decode($this->scrap($pathTps), true);
                         $contents = $this->scrap($pathTps);
-                        $this->savePemilih($contents);
-                        // break;
+                        $meta = [
+                            'provinsi' => $tps['namaPropinsi'],
+                            'kota' => $tps['namaKabKota'],
+                            'kecamatan' => $tps['namaKecamatan'],
+                            'kelurahan' => $tps['namaKelurahan'],
+                        ];
+                        $this->savePemilih($contents, $meta);
+                        break;
                     }
                     // var_dump($arrayTps);
                     break;
@@ -100,7 +106,7 @@ class ScrapeCommand extends Command
         return;
     }
 
-    private function savePemilih(string $json)
+    private function savePemilih(string $json, array $meta)
     {
         $arrayPemilih = json_decode($json, true);
         $index = 0;
@@ -114,11 +120,11 @@ class ScrapeCommand extends Command
             $pemilih->setNama($calonPemilih['nama'])
                 ->setNik($calonPemilih['nik'])
                 ->setJenisKelamin($calonPemilih['jenisKelamin'])
-                ->setAlamat('')
-                ->setKelurahan('')
-                ->setKecamatan('')
-                ->setKota('')
-                ->setProvinsi('')
+                ->setAlamat($meta['kelurahan'])
+                ->setKelurahan($meta['kelurahan'])
+                ->setKecamatan($meta['kecamatan'])
+                ->setKota($meta['kota'])
+                ->setProvinsi($meta['provinsi'])
             ;
             $this->em->persist($pemilih);
             if (($index % 20) === 0) {
