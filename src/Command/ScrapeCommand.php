@@ -50,7 +50,7 @@ class ScrapeCommand extends Command
     private function makeRequest()
     {
         $client = new Client(['base_uri' => $this->baseURI]);
-        $response = $client->request('GET', $this->generatePath('KOTA SERANG/CIPOCOK JAYA/BANJAR AGUNG/1/'));
+        $response = $client->request('GET', $this->generatePath(''));
         $this->savePemilih($response->getBody()->getContents());
         return;
     }
