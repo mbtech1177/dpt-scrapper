@@ -51,6 +51,11 @@ class Pemilih
      */
     private $provinsi;
 
+    /**
+     * @ORM\Column(type="string", length=255)
+     */
+    private $nik;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -136,6 +141,18 @@ class Pemilih
     public function setProvinsi(string $provinsi): self
     {
         $this->provinsi = $provinsi;
+
+        return $this;
+    }
+
+    public function getNik(): ?string
+    {
+        return $this->nik;
+    }
+
+    public function setNik(string $nik): self
+    {
+        $this->nik = $nik;
 
         return $this;
     }
