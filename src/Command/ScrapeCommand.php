@@ -51,6 +51,15 @@ class ScrapeCommand extends Command
     {
         $client = new Client(['base_uri' => $this->baseURI]);
         $response = $client->request('GET', $this->generatePath(''));
+
+        $contents = $response->getBody()->getContents();
+        $arrayContents = json_decode($contents, true);
+
+        if (!isset($arrayContents['aaData'][0]['nik'])) {
+            print "Not Found!\n";
+            return;
+        }
+
         $this->savePemilih($response->getBody()->getContents());
         return;
     }
