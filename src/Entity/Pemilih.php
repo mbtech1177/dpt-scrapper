@@ -73,7 +73,7 @@ class Pemilih
 
     public function setNama(string $nama): self
     {
-        $this->name = $name;
+        $this->nama = $nama;
 
         return $this;
     }
