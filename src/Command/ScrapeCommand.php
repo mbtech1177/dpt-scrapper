@@ -16,6 +16,11 @@ class ScrapeCommand extends Command
     private $suffix = 'listDps.json';
     private $timestamp;
     private $em;
+    private $provinsi;
+    private $kota;
+    private $kecamatan;
+    private $kelurahan;
+    private $tps;
     protected static $defaultName = 'app:scrape';
 
     public function __construct(EntityManagerInterface $em)
