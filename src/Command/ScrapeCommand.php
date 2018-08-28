@@ -82,6 +82,7 @@ class ScrapeCommand extends Command
                     foreach ($arrayTps['aaData'] as $tps) {
                         // Scrap data by tps
                         $pathTps = $pathKelurahan . $tps['tps'] . '/';
+                        $io->section('Scrapping ' . $pathTps);
                         $contents = $this->scrap($pathTps);
                         $meta = [
                             'provinsi' => $tps['namaPropinsi'],
