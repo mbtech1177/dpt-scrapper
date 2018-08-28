@@ -42,7 +42,7 @@ class ScrapeCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $io->title('Memulai scrapping data ...');
-        $this->makeRequest();
+        $this->makeRequest($io);
         $io->success('Proses scrapping telah selesai.');
     }
 
@@ -52,7 +52,7 @@ class ScrapeCommand extends Command
         return $path . $this->suffix . $this->timestamp;
     }
 
-    private function makeRequest()
+    private function makeRequest($io)
     {
         $path = '';
         $contents = $this->scrap($path);
@@ -65,16 +65,19 @@ class ScrapeCommand extends Command
             // Scrap data by kota
             $pathKota = $path . $kota['namaKabKota'] . '/';
             $arrayKecamatan = json_decode($this->scrap($pathKota), true);
+            $io->section('Scrapping ' . $pathKota);
 
             foreach ($arrayKecamatan['aaData'] as $kecamatan) {
                 // Scrap data by kecamatan
                 $pathKecamatan = $pathKota . $kecamatan['namaKecamatan'] . '/';
                 $arrayKelurahan = json_decode($this->scrap($pathKecamatan), true);
+                $io->section('Scrapping ' . $pathKecamatan);
 
                 foreach ($arrayKelurahan['aaData'] as $kelurahan) {
                     // Scrap data by kelurahan
                     $pathKelurahan = $pathKecamatan . $kelurahan['namaKelurahan'] . '/';
                     $arrayTps = json_decode($this->scrap($pathKelurahan), true);
+                    $io->section('Scrapping ' . $pathKelurahan);
 
                     foreach ($arrayTps['aaData'] as $tps) {
                         // Scrap data by tps
