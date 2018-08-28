@@ -54,15 +54,17 @@ class ScrapeCommand extends Command
 
     private function makeRequest()
     {
-        $contents = $this->scrap('');
-        $arrayContents = json_decode($contents, true);
+        $path = '';
+        $contents = $this->scrap($path);
+        $arrayKota = json_decode($contents, true);
 
         $totalPemilih = 0;
-        foreach ($arrayContents['aaData'] as $kota) {
+        foreach ($arrayKota['aaData'] as $kota) {
             $totalPemilih += $kota['totalPemilih'];
 
             // Scrap data by kota
-            var_dump($this->scrap($kota['namaKabKota'].'/'));
+            $pathKota = $path . $kota['namaKabKota'] . '/';
+            var_dump($this->scrap($pathKota));
         }
         print "Total Pemilih: " . $totalPemilih . PHP_EOL;
 
