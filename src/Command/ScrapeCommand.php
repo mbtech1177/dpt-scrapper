@@ -64,16 +64,39 @@ class ScrapeCommand extends Command
 
             // Scrap data by kota
             $pathKota = $path . $kota['namaKabKota'] . '/';
-            var_dump($this->scrap($pathKota));
-        }
-        print "Total Pemilih: " . $totalPemilih . PHP_EOL;
+            $arrayKecamatan = json_decode($this->scrap($pathKota), true);
 
-        if (!isset($arrayContents['aaData'][0]['nik'])) {
-            print "Not Found!\n";
-            return;
-        }
+            foreach ($arrayKecamatan['aaData'] as $kecamatan) {
+                $pathKecamatan = $pathKota . $kecamatan['namaKecamatan'] . '/';
+                $arrayKelurahan = json_decode($this->scrap($pathKecamatan), true);
 
-        $this->savePemilih($response->getBody()->getContents());
+                foreach ($arrayKelurahan['aaData'] as $kelurahan) {
+                    $pathKelurahan = $pathKecamatan . $kelurahan['namaKelurahan'] . '/';
+                    $arrayTps = json_decode($this->scrap($pathKelurahan), true);
+
+                    foreach ($arrayTps['aaData'] as $tps) {
+                        $pathTps = $pathKelurahan . $tps['tps'] . '/';
+                        // $arrayPemilih = json_decode($this->scrap($pathTps), true);
+                        $contents = $this->scrap($pathTps);
+                        $this->savePemilih($contents);
+                        // break;
+                    }
+                    // var_dump($arrayTps);
+                    break;
+                }
+                break;
+            }
+            break;
+            // var_dump($arrayKecamatan);
+        }
+        // print "Total Pemilih: " . $totalPemilih . PHP_EOL;
+
+        // if (!isset($arrayContents['aaData'][0]['nik'])) {
+        //     print "Not Found!\n";
+        //     return;
+        // }
+
+        // $this->savePemilih($response->getBody()->getContents());
         return;
     }
 
