@@ -4,9 +4,11 @@ namespace App\Command;
 
 use App\Entity\Pemilih;
 use App\Entity\Target;
+use App\Repository\TargetRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Client;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Helper\ProgressBar;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -25,11 +27,12 @@ class ScrapeCommand extends Command
     private $tps;
     protected static $defaultName = 'app:scrape';
 
-    public function __construct(EntityManagerInterface $em)
+    public function __construct(EntityManagerInterface $em, TargetRepository $targetRepository)
     {
         parent::__construct();
 
         $this->em = $em;
+        $this->targetRepository = $targetRepository;
     }
 
     protected function configure()
@@ -51,7 +54,7 @@ class ScrapeCommand extends Command
                 $this->startProducer($io);
                 break;
             case 'worker':
-                $this->startWorker($io);
+                $this->startWorker($io, $output);
                 break;
         }
         return;
@@ -192,5 +195,25 @@ class ScrapeCommand extends Command
             }
         }
         $io->success('Target url telah didapat.');
+    }
+
+    private function startWorker($io, $output)
+    {
+        $io->section('Memulai worker proses ...');
+
+
+        ProgressBar::setFormatDefinition(
+            'custom',
+            '<info>%elapsed%:%memory%</info> - <fg=white;bg=blue>%message%</>'
+        );
+        $target = $this->targetRepository->findOneBy(['status' => 1]);
+
+        $progressBar = new ProgressBar($output);
+        $progressBar->setFormat('custom');
+        $progressBar->setMessage('Target url: ' . $this->generatePath($target->getUrl()));
+
+        $progressBar->start();
+        $progressBar->finish();
+        print 'Selesai' . PHP_EOL;
     }
 }
