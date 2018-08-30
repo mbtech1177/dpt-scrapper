@@ -156,10 +156,12 @@ class ScrapeCommand extends Command
         );
         $progressBar = new ProgressBar($output);
         $progressBar->setFormat('custom');
-        $progressBar->setMessage('Target url: ' . $this->generatePath($target->getUrl()));
+        $progressBar->setMessage('Memulai proses scrapping ...');
         $progressBar->start();
 
         while ($target) {
+            $progressBar->setMessage('Target url: ' . $this->generatePath($target->getUrl()));
+            $progressBar->advance();
             $meta = explode('/', $target->getUrl());
             $meta = [
                 'provinsi' => 'BANTEN',
