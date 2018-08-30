@@ -201,19 +201,34 @@ class ScrapeCommand extends Command
     {
         $io->section('Memulai worker proses ...');
 
+        $target = $this->targetRepository->findOneBy(['status' => 1]);
 
         ProgressBar::setFormatDefinition(
             'custom',
             '<info>%elapsed%:%memory%</info> - <fg=white;bg=blue>%message%</>'
         );
-        $target = $this->targetRepository->findOneBy(['status' => 1]);
-
         $progressBar = new ProgressBar($output);
         $progressBar->setFormat('custom');
         $progressBar->setMessage('Target url: ' . $this->generatePath($target->getUrl()));
-
         $progressBar->start();
+
+        while ($target) {
+            $meta = explode('/', $target->getUrl());
+            $meta = [
+                'provinsi' => 'BANTEN',
+                'kota' => $meta[0],
+                'kecamatan' => $meta[1],
+                'kelurahan' => $meta[2],
+            ];
+
+            $target->setStatus(0);
+            $this->savePemilih($this->scrap($target->getUrl()), $meta);
+            $target = $this->targetRepository->findOneBy(['status' => 1]);
+        }
+        $this->em->flush();
+
         $progressBar->finish();
         print 'Selesai' . PHP_EOL;
+        return;
     }
 }
