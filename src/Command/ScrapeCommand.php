@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Entity\Pemilih;
+use App\Entity\Target;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Client;
 use Symfony\Component\Console\Command\Command;
@@ -154,6 +155,42 @@ class ScrapeCommand extends Command
 
     private function startProducer($io)
     {
-        $io->writeln('Starting producer process, ...');
+        $io->writeln('Memulai proses producer untuk mendapatkan target url, ...');
+        $path = '';
+        $contents = $this->scrap($path);
+        $arrayKota = json_decode($contents, true);
+
+        $totalPemilih = 0;
+        foreach ($arrayKota['aaData'] as $kota) {
+            $totalPemilih += $kota['totalPemilih'];
+
+            // Scrap data by kota
+            $pathKota = $path . $kota['namaKabKota'] . '/';
+            $arrayKecamatan = json_decode($this->scrap($pathKota), true);
+            $io->section('Scrapping ' . $pathKota);
+
+            foreach ($arrayKecamatan['aaData'] as $kecamatan) {
+                // Scrap data by kecamatan
+                $pathKecamatan = $pathKota . $kecamatan['namaKecamatan'] . '/';
+                $arrayKelurahan = json_decode($this->scrap($pathKecamatan), true);
+                $io->section('Scrapping ' . $pathKecamatan);
+
+                foreach ($arrayKelurahan['aaData'] as $kelurahan) {
+                    // Persist target into database
+                    $indexTps = 1;
+                    while ($indexTps <= $kelurahan['jmlTps']) {
+                        $targetUrl = $pathKecamatan . $kelurahan['namaKelurahan'] . '/' . $indexTps .'/';
+                        $targetEntity = new Target;
+                        $targetEntity->setUrl($targetUrl)
+                            ->setStatus(1)
+                        ;
+                        $this->em->persist($targetEntity);
+                        $indexTps++;
+                    }
+                    $this->em->flush();
+                }
+            }
+        }
+        $io->success('Target url telah didapat.');
     }
 }
