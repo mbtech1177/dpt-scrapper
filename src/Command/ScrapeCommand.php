@@ -44,6 +44,16 @@ class ScrapeCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $io->title('Memulai scrapping data ...');
+        $processType = $input->getArgument('type');
+        switch ($processType) {
+            case 'producer':
+                $this->startProducer($io);
+                break;
+            case 'worker':
+                $this->startWorker($io);
+                break;
+        }
+        return;
         $this->makeRequest($io);
         $io->success('Proses scrapping telah selesai.');
     }
@@ -140,5 +150,10 @@ class ScrapeCommand extends Command
         $client = new Client(['base_uri' => $this->baseURI]);
         $response = $client->request('GET', $this->generatePath($path));
         return $response->getBody()->getContents();
+    }
+
+    private function startProducer($io)
+    {
+        $io->writeln('Starting producer process, ...');
     }
 }
