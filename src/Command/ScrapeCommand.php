@@ -171,10 +171,10 @@ class ScrapeCommand extends Command
             ];
 
             $target->setStatus(0);
+            $this->em->flush();
             $this->savePemilih($this->scrap($target->getUrl()), $meta);
             $target = $this->targetRepository->findOneBy(['status' => 1]);
         }
-        $this->em->flush();
 
         $progressBar->finish();
         print 'Selesai' . PHP_EOL;
