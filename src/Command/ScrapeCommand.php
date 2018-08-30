@@ -6,6 +6,7 @@ use App\Entity\Pemilih;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Client;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -34,6 +35,7 @@ class ScrapeCommand extends Command
     {
         $this
             ->setDescription('Scrap daftar pemilih tetap pilkada tahun 2018 di Provinsi Banten.')
+            ->addArgument('type', InputArgument::REQUIRED, 'Which process to start, producer or worker. Valid value is \'producer\' and \'worker\'')
         ;
     }
 
