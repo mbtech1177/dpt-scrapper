@@ -3,9 +3,11 @@
 namespace App\Command;
 
 use App\Entity\Pemilih;
+use App\Entity\Target;
 use Doctrine\ORM\EntityManagerInterface;
 use GuzzleHttp\Client;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -34,6 +36,7 @@ class ScrapeCommand extends Command
     {
         $this
             ->setDescription('Scrap daftar pemilih tetap pilkada tahun 2018 di Provinsi Banten.')
+            ->addArgument('type', InputArgument::REQUIRED, 'Which process to start, producer or worker. Valid value is \'producer\' and \'worker\'')
         ;
     }
 
@@ -42,6 +45,16 @@ class ScrapeCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $io->title('Memulai scrapping data ...');
+        $processType = $input->getArgument('type');
+        switch ($processType) {
+            case 'producer':
+                $this->startProducer($io);
+                break;
+            case 'worker':
+                $this->startWorker($io);
+                break;
+        }
+        return;
         $this->makeRequest($io);
         $io->success('Proses scrapping telah selesai.');
     }
@@ -138,5 +151,46 @@ class ScrapeCommand extends Command
         $client = new Client(['base_uri' => $this->baseURI]);
         $response = $client->request('GET', $this->generatePath($path));
         return $response->getBody()->getContents();
+    }
+
+    private function startProducer($io)
+    {
+        $io->writeln('Memulai proses producer untuk mendapatkan target url, ...');
+        $path = '';
+        $contents = $this->scrap($path);
+        $arrayKota = json_decode($contents, true);
+
+        $totalPemilih = 0;
+        foreach ($arrayKota['aaData'] as $kota) {
+            $totalPemilih += $kota['totalPemilih'];
+
+            // Scrap data by kota
+            $pathKota = $path . $kota['namaKabKota'] . '/';
+            $arrayKecamatan = json_decode($this->scrap($pathKota), true);
+            $io->section('Scrapping ' . $pathKota);
+
+            foreach ($arrayKecamatan['aaData'] as $kecamatan) {
+                // Scrap data by kecamatan
+                $pathKecamatan = $pathKota . $kecamatan['namaKecamatan'] . '/';
+                $arrayKelurahan = json_decode($this->scrap($pathKecamatan), true);
+                $io->section('Scrapping ' . $pathKecamatan);
+
+                foreach ($arrayKelurahan['aaData'] as $kelurahan) {
+                    // Persist target into database
+                    $indexTps = 1;
+                    while ($indexTps <= $kelurahan['jmlTps']) {
+                        $targetUrl = $pathKecamatan . $kelurahan['namaKelurahan'] . '/' . $indexTps .'/';
+                        $targetEntity = new Target;
+                        $targetEntity->setUrl($targetUrl)
+                            ->setStatus(1)
+                        ;
+                        $this->em->persist($targetEntity);
+                        $indexTps++;
+                    }
+                    $this->em->flush();
+                }
+            }
+        }
+        $io->success('Target url telah didapat.');
     }
 }
