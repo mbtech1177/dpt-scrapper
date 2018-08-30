@@ -57,8 +57,6 @@ class ScrapeCommand extends Command
                 $this->startWorker($io, $output);
                 break;
         }
-        return;
-        $this->makeRequest($io);
         $io->success('Proses scrapping telah selesai.');
     }
 
@@ -66,57 +64,6 @@ class ScrapeCommand extends Command
     {
         $this->timestamp = '?_=' . (new \Datetime)->getTimestamp();
         return $path . $this->suffix . $this->timestamp;
-    }
-
-    private function makeRequest($io)
-    {
-        $path = '';
-        $contents = $this->scrap($path);
-        $arrayKota = json_decode($contents, true);
-
-        $totalPemilih = 0;
-        foreach ($arrayKota['aaData'] as $kota) {
-            $totalPemilih += $kota['totalPemilih'];
-
-            // Scrap data by kota
-            $pathKota = $path . $kota['namaKabKota'] . '/';
-            $arrayKecamatan = json_decode($this->scrap($pathKota), true);
-            $io->section('Scrapping ' . $pathKota);
-
-            foreach ($arrayKecamatan['aaData'] as $kecamatan) {
-                // Scrap data by kecamatan
-                $pathKecamatan = $pathKota . $kecamatan['namaKecamatan'] . '/';
-                $arrayKelurahan = json_decode($this->scrap($pathKecamatan), true);
-                $io->section('Scrapping ' . $pathKecamatan);
-
-                foreach ($arrayKelurahan['aaData'] as $kelurahan) {
-                    // Scrap data by kelurahan
-                    $pathKelurahan = $pathKecamatan . $kelurahan['namaKelurahan'] . '/';
-                    $arrayTps = json_decode($this->scrap($pathKelurahan), true);
-                    $io->section('Scrapping ' . $pathKelurahan);
-
-                    foreach ($arrayTps['aaData'] as $tps) {
-                        // Scrap data by tps
-                        $pathTps = $pathKelurahan . $tps['tps'] . '/';
-                        $io->section('Scrapping ' . $pathTps);
-                        $contents = $this->scrap($pathTps);
-                        $meta = [
-                            'provinsi' => $tps['namaPropinsi'],
-                            'kota' => $tps['namaKabKota'],
-                            'kecamatan' => $tps['namaKecamatan'],
-                            'kelurahan' => $tps['namaKelurahan'],
-                        ];
-                        // Persist result into database
-                        $this->savePemilih($contents, $meta);
-                        // break;
-                    }
-                    // break;
-                }
-                // break;
-            }
-            // break;
-        }
-        return;
     }
 
     private function savePemilih(string $json, array $meta)
